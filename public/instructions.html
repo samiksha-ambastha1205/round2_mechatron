@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Instructions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: 'Special Elite', monospace; background: #0f0f0f; color: #f0e5d1; display: flex; min-height: 100vh; }
+        .container { margin: auto; max-width: 800px; padding: 24px; border: 1px solid #c89f68; border-radius: 8px; background: rgba(0,0,0,0.4); }
+        h1 { font-family: 'Playfair Display', serif; color: #c89f68; text-align: center; margin-bottom: 8px; }
+        ol { line-height: 1.7; }
+        .btn { display: block; width: 100%; margin-top: 20px; padding: 12px 16px; border: 2px solid #7c5c3c; border-radius: 6px; background: linear-gradient(145deg, #a78051, #d3ad7c); color: #1a1a1a; font-weight: bold; cursor: pointer; }
+        .btn:hover { filter: brightness(1.05); }
+        .note { font-size: 0.95rem; opacity: 0.85; margin-top: 12px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const startBtn = document.getElementById('start-session');
+            startBtn.addEventListener('click', async function () {
+                try {
+                    if (document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } catch (e) { /* ignore if fullscreen not allowed */ }
+                window.location.href = '/index';
+            });
+        });
+    </script>
+    </head>
+<body>
+    <div class="container">
+        <h1>Session Instructions</h1>
+        <p>Please read carefully before starting.</p>
+        <ol>
+            <li>The session runs in fullscreen. Do not exit fullscreen.</li>
+            <li>Do not switch tabs/apps. Doing so will trigger warnings and can end the session.</li>
+            <li>Do not resize or split the screen below the allowed threshold.</li>
+            <li>Copy, paste, right-click, and developer tools are disabled.</li>
+            <li>You have limited time. Keep an eye on the timer.</li>
+        </ol>
+        <p class="note">Clicking Start will enter fullscreen and begin the session.</p>
+        <button id="start-session" class="btn">Start</button>
+    </div>
+</body>
+</html>
+
+

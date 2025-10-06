@@ -28,6 +28,11 @@ app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Instructions page before starting the session
+app.get('/instructions', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'instructions.html'));
+});
+
 // --- API ROUTES ---
 
 /**
