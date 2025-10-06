@@ -182,6 +182,8 @@
     <div id="esc-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>A further breach will terminate the session and lock the archives.</p><button class="resume-button">Resume Review</button></div></div>
     <div id="tab-warning-1" class="warning-overlay"><div class="entry-content"><h2>Security Warning 1 of 2</h2><p>Switching focus from the case file is a breach of protocol.</p><button class="resume-button">Resume Review</button></div></div>
     <div id="tab-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>A further breach will terminate the session and lock the archives.</p><button class="resume-button">Resume Review</button></div></div>
+    <div id="resize-warning-1" class="warning-overlay"><div class="entry-content"><h2>Security Warning 1 of 2</h2><p>Split screen or window resizing is not allowed.</p><button class="resume-button">Resume Review</button></div></div>
+    <div id="resize-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>Further resizing will terminate the session and lock the archives.</p><button class="resume-button">Resume Review</button></div></div>
 
     <div class="case-wrapper" style="display: none;">
         <!-- Atmospheric overlays -->
@@ -288,6 +290,8 @@
                 esc2: document.getElementById('esc-warning-2'),
                 tab1: document.getElementById('tab-warning-1'),
                 tab2: document.getElementById('tab-warning-2'),
+                resize1: document.getElementById('resize-warning-1'),
+                resize2: document.getElementById('resize-warning-2'),
             };
 
             document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
@@ -297,6 +301,7 @@
             let agentId = '';
             let escWarningCount = 0;
             let tabSwitchCount = 0;
+            let resizeWarningCount = 0;
             let timeLeft = 900; // 15 minutes
             let initialWidth, initialHeight;
 
@@ -368,7 +373,13 @@
                 window.addEventListener('resize', () => {
                     if (sessionHasEnded || !initialWidth || !initialHeight) return;
                     if (window.innerWidth < (initialWidth * 0.8) || window.innerHeight < (initialHeight * 0.8)) {
-                        endSession({ reason: 'violation_limit' });
+                        resizeWarningCount++;
+                        pauseTimer();
+                        if (resizeWarningCount === 1) { overlays.resize1.style.display = 'flex'; }
+                        else if (resizeWarningCount === 2) { overlays.resize2.style.display = 'flex'; }
+                        else {
+                            endSession({ reason: 'violation_limit' });
+                        }
                     }
                 });
                 
