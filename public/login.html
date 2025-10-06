@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Baker Street Ledger | Agent Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles for the Victorian Detective Theme */
+        :root {
+            --charcoal-black: #1a1a1a;
+            --deep-brown: #3d2c1d;
+            --brass-gold: #c89f68;
+            --sepia-beige: #f0e5d1;
+            --crimson-red: #8a0303;
+        }
+
+        body {
+            background-color: var(--charcoal-black);
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            font-family: 'Special Elite', monospace;
+            color: var(--charcoal-black);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Atmospheric Effects --- */
+        #fog-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+            background: 
+                radial-gradient(circle at 10% 90%, rgba(100,100,100,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(100,100,100,0.1) 0%, transparent 50%);
+        }
+        #fog-layer::before, #fog-layer::after {
+            content: ''; position: absolute; width: 200%; height: 100%;
+            background: transparent;
+            background-image: linear-gradient(transparent, rgba(50, 50, 50, 0.2), transparent);
+            opacity: 0.3; animation: drift 60s linear infinite;
+        }
+        #fog-layer::before { animation-duration: 75s; }
+        #fog-layer::after { animation-duration: 90s; animation-direction: reverse; }
+
+        @keyframes drift {
+            from { transform: translateX(-50%); }
+            to { transform: translateX(50%); }
+        }
+
+        #gas-lamp-flicker {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 99;
+            background: 
+                radial-gradient(circle at 5% 5%, rgba(200, 159, 104, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 95% 95%, rgba(200, 159, 104, 0.15) 0%, transparent 20%);
+            animation: flicker 5s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 0.6; }
+            20%, 24%, 55% { opacity: 0.5; }
+        }
+        
+        /* --- Typography --- */
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--deep-brown);
+        }
+
+        /* --- Login Page specific styles --- */
+        .login-page {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        /* --- Paper Card Style --- */
+        .paper-card {
+            background-color: var(--sepia-beige);
+            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.2);
+            border: 1px solid #c3b5a0; border-radius: 3px;
+            position: relative; overflow: hidden; width: 100%; max-width: 400px;
+            z-index: 20; opacity: 0; transform: scale(0.9);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+        .paper-card.visible { opacity: 1; transform: scale(1); }
+        .paper-card::after { /* Burnt edge effect */
+            content: ''; position: absolute; top: -10px; right: -10px; bottom: -10px; left: -10px;
+            background: transparent; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            pointer-events: none; filter: blur(3px); border-radius: 5px;
+        }
+
+        .form-title {
+            text-align: center; font-size: 2.25rem;
+            padding-bottom: 0.5rem; margin-bottom: 1.5rem;
+            border-bottom: 2px double var(--deep-brown);
+        }
+        .form-input {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1px solid var(--deep-brown); padding: 10px 5px;
+            font-family: 'Special Elite', monospace; font-size: 1rem;
+            color: var(--charcoal-black); transition: border-color 0.3s;
+        }
+        .form-input:focus { outline: none; border-bottom: 2px solid var(--brass-gold); }
+        .form-label { color: var(--deep-brown); font-family: 'Playfair Display', serif; }
+
+        .submit-button {
+            width: 100%; padding: 12px; border-radius: 4px; border: 2px solid #7c5c3c;
+            background: linear-gradient(145deg, #a78051, #d3ad7c);
+            color: var(--charcoal-black); font-family: 'Playfair Display', serif;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+        .submit-button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3); }
+        .submit-button:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3); }
+
+        /* --- Intro Animation --- */
+        #intro-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50; pointer-events: none; opacity: 1;
+            transition: opacity 1s ease-in-out 3s;
+        }
+        #intro-animation.hidden { opacity: 0; }
+        
+        .magnifying-glass {
+            position: absolute; width: 200px; height: 200px;
+            animation: scan 4s ease-in-out forwards;
+        }
+        .magnifying-glass circle { stroke: var(--brass-gold); stroke-width: 15; fill: rgba(240, 229, 209, 0.1); }
+        .magnifying-glass line { stroke: var(--deep-brown); stroke-width: 20; }
+
+        @keyframes scan {
+            0% { top: 20%; left: -200px; transform: rotate(-45deg) scale(0.8); }
+            30% { top: 50%; left: 40%; transform: rotate(10deg) scale(1.2); }
+            70% { top: 40%; left: 60%; transform: rotate(-10deg) scale(1.2); }
+            100% { top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg) scale(2.5); opacity: 0; }
+        }
+
+        .error-message {
+            color: var(--crimson-red);
+            text-align: center;
+            margin-top: 1rem;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <!-- Atmospheric overlays -->
+    <div id="fog-layer"></div>
+    <div id="gas-lamp-flicker"></div>
+    
+    <!-- Intro Animation -->
+    <div id="intro-animation">
+        <svg class="magnifying-glass" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="80" cy="80" r="70"/>
+            <line x1="135" y1="135" x2="180" y2="180"/>
+        </svg>
+    </div>
+
+    <!-- Login Page Content -->
+    <div class="login-page">
+        <div class="paper-card p-8" id="login-form-container">
+            <h2 class="form-title">Agent Access</h2>
+            <form id="login-form">
+                <div class="mb-6">
+                    <label for="agent-id" class="form-label block mb-2">Agent Identification</label>
+                    <input type="text" name="agentId" id="agent-id" placeholder="e.g., S. Holmes" required class="form-input">
+                </div>
+                <div class="mb-8">
+                    <label for="password" class="form-label block mb-2">Codeword</label>
+                    <input type="password" name="password" id="password" placeholder="••••••••" required class="form-input">
+                </div>
+                <button type="submit" class="submit-button">Access Archives</button>
+                <p id="error-message" class="error-message">Access Denied. Incorrect Codeword.</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Authentication is handled by the server using environment variables.
+
+            const loginFormContainer = document.getElementById('login-form-container');
+            const introAnimation = document.getElementById('intro-animation');
+            const loginForm = document.getElementById('login-form');
+            const agentIdInput = document.getElementById('agent-id');
+            const passwordInput = document.getElementById('password');
+            const errorMessage = document.getElementById('error-message');
+
+            // After the intro animation finishes (4s), reveal the form.
+            setTimeout(() => {
+                loginFormContainer.classList.add('visible');
+                introAnimation.classList.add('hidden');
+            }, 4000);
+
+            // Handle form submission
+            loginForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                errorMessage.style.display = 'none';
+                
+                try {
+                    const body = {
+                        agentId: agentIdInput.value.trim(),
+                        password: passwordInput.value
+                    };
+                    const res = await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (res.ok && data && data.success) {
+                        // Save the agent ID to localStorage to be used by index.html
+                        localStorage.setItem('agentId', body.agentId);
+                        // On success, fade out the form and redirect
+                        loginFormContainer.style.opacity = '0';
+                        loginFormContainer.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 500);
+                    } else {
+                        errorMessage.style.display = 'block';
+                        loginFormContainer.style.animation = 'shake 0.5s';
+                        setTimeout(() => { loginFormContainer.style.animation = ''; }, 500);
+                    }
+                } catch (err) {
+                    errorMessage.style.display = 'block';
+                    loginFormContainer.style.animation = 'shake 0.5s';
+                    setTimeout(() => { loginFormContainer.style.animation = ''; }, 500);
+                }
+            });
+        });
+    </script>
+    <style> /* Add shake animation here to keep it self-contained */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) scale(1); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) scale(1); }
+        }
+    </style>
+</body>
+</html>
+
