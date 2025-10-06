@@ -38,7 +38,7 @@ app.post('/login', (req, res) => {
     const { agentId, password } = req.body;
 
     if (!agentId || !password) {
-        return res.status(400).json({ success: false, message: 'Agent ID and Codeword are required.' });
+        return res.status(400).json({ success: false, message: 'Team ID and Codeword are required.' });
     }
 
     // Build the allowlist of valid agent IDs from TEAM_ID_* env vars and optional AGENT_ID

@@ -192,7 +192,7 @@
             <!-- Info Boxes -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="info-box">
-                    <h2 class="text-lg">Agent ID</h2>
+                    <h2 class="text-lg">Team ID</h2>
                     <span id="agent-id-display" class="text-2xl font-bold">Loading...</span>
                 </div>
                 <div class="info-box md:text-right">
@@ -301,7 +301,7 @@
             let initialWidth, initialHeight;
 
             // In a real scenario, login.html would save this. For now, we'll try to get it.
-            agentId = localStorage.getItem('agentId') || 'S. Holmes'; // Default for direct access
+            agentId = localStorage.getItem('agentId') || 'Unknown Team'; // Default for direct access
             if (!agentId) {
                 window.location.href = 'login.html';
                 return;
