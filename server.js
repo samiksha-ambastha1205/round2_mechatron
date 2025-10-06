@@ -25,7 +25,7 @@ app.post('/login', (req, res) => {
     const { agentId, password } = req.body;
 
     // Retrieve the correct credentials from environment variables
-    const correctAgentId = process.env.AGENT_ID;
+    const correctAgentId = process.env.TEAM_ID;
     const correctCodeword = process.env.AGENT_CODEWORD;
 
     if (!agentId || !password) {
