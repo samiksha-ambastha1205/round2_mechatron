@@ -69,7 +69,7 @@ app.get('*', (req, res) => {
 });
 
 // --- SERVER INITIALIZATION ---
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
     console.log('For local development, set AGENT_CODEWORD and any TEAM_ID_* (e.g., TEAM_ID_251=1251) in your .env file. Optionally set AGENT_ID as a single allowed ID.');
 });
