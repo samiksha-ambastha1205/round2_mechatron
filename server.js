@@ -42,24 +42,44 @@ app.post('/login', (req, res) => {
         return res.status(400).json({ success: false, message: 'Team ID and Codeword are required.' });
     }
 
-    // Build the allowlist of valid agent IDs from TEAM_ID_* env vars and optional AGENT_ID
-    const validAgentIds = new Set();
+    // Build mappings from TEAM_ID_* env vars
+    const suffixToValue = {};
+    const allIds = new Set();
     Object.keys(process.env)
         .filter((key) => key.startsWith('TEAM_ID_'))
-        .forEach((key) => { if (process.env[key]) validAgentIds.add(process.env[key]); });
-    if (process.env.AGENT_ID) validAgentIds.add(process.env.AGENT_ID);
+        .forEach((key) => {
+            const value = String(process.env[key] || '').trim();
+            const suffix = key.substring('TEAM_ID_'.length).trim();
+            if (!suffix || !value) return;
+            suffixToValue[suffix] = value; // e.g., { '001': '1001' }
+            allIds.add(suffix);           // allow entering '001'
+            allIds.add(value);            // allow entering '1001'
+        });
+    if (process.env.AGENT_ID) allIds.add(process.env.AGENT_ID);
 
-    // Normalize codeword comparison to lowercase for robustness
-    const correctCodeword = (process.env.AGENT_CODEWORD || '').toLowerCase();
-
-    const isAgentValid = validAgentIds.has(teamId);
-    const isCodewordValid = codeword.toLowerCase() === correctCodeword;
-
-    if (isAgentValid && isCodewordValid) {
-        res.json({ success: true, message: 'Authentication successful.' });
+    // Determine expected codeword for the provided teamId
+    let expectedCodeword = '';
+    if (suffixToValue[teamId]) {
+        // teamId provided as suffix, e.g., '001' => expect '1001'
+        expectedCodeword = suffixToValue[teamId];
     } else {
-        res.status(401).json({ success: false, message: 'Access Denied. Incorrect Credentials.' });
+        // If teamId matches a value (e.g., '1001'), expect the same value as codeword
+        const matchesAValue = Object.values(suffixToValue).includes(teamId);
+        if (matchesAValue) expectedCodeword = teamId;
     }
+
+    // Fallback: if AGENT_CODEWORD is configured and teamId is in allowlist, accept that too
+    const fallbackCodeword = (process.env.AGENT_CODEWORD || '').trim();
+    const teamIdIsAllowed = allIds.has(teamId);
+
+    const provided = String(codeword || '');
+    const matchesPerTeam = expectedCodeword && provided === expectedCodeword;
+    const matchesFallback = fallbackCodeword && teamIdIsAllowed && provided.toLowerCase() === fallbackCodeword.toLowerCase();
+
+    if (matchesPerTeam || matchesFallback) {
+        return res.json({ success: true, message: 'Authentication successful.' });
+    }
+    return res.status(401).json({ success: false, message: 'Access Denied. Incorrect Credentials.' });
 });
 
 // --- SERVE STATIC FILES ---
