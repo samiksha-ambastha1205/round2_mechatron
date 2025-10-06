@@ -35,9 +35,10 @@ app.get('/index', (req, res) => {
  * @desc    Authenticate an agent based on credentials from environment variables.
  */
 app.post('/login', (req, res) => {
-    const { agentId, password } = req.body;
+    const teamId = req.body.teamId ?? req.body.agentId;
+    const codeword = req.body.codeword ?? req.body.password;
 
-    if (!agentId || !password) {
+    if (!teamId || !codeword) {
         return res.status(400).json({ success: false, message: 'Team ID and Codeword are required.' });
     }
 
@@ -51,8 +52,8 @@ app.post('/login', (req, res) => {
     // Normalize codeword comparison to lowercase for robustness
     const correctCodeword = (process.env.AGENT_CODEWORD || '').toLowerCase();
 
-    const isAgentValid = validAgentIds.has(agentId);
-    const isCodewordValid = password.toLowerCase() === correctCodeword;
+    const isAgentValid = validAgentIds.has(teamId);
+    const isCodewordValid = codeword.toLowerCase() === correctCodeword;
 
     if (isAgentValid && isCodewordValid) {
         res.json({ success: true, message: 'Authentication successful.' });

@@ -301,7 +301,7 @@
             let initialWidth, initialHeight;
 
             // In a real scenario, login.html would save this. For now, we'll try to get it.
-            agentId = localStorage.getItem('agentId') || 'Unknown Team'; // Default for direct access
+            agentId = localStorage.getItem('teamId') || 'Unknown Team'; // Default for direct access
             if (!agentId) {
                 window.location.href = 'login.html';
                 return;

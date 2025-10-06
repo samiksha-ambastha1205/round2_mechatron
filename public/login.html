@@ -168,11 +168,11 @@
             <form id="login-form">
                 <div class="mb-6">
                     <label for="agent-id" class="form-label block mb-2">Team ID</label>
-                    <input type="text" name="agentId" id="agent-id" placeholder="e.g., 1251" required class="form-input">
+                    <input type="text" name="teamId" id="agent-id" placeholder="e.g., 1251" required class="form-input">
                 </div>
                 <div class="mb-8">
                     <label for="password" class="form-label block mb-2">Codeword</label>
-                    <input type="password" name="password" id="password" placeholder="••••••••" required class="form-input">
+                    <input type="password" name="codeword" id="password" placeholder="••••••••" required class="form-input">
                 </div>
                 <button type="submit" class="submit-button">Access Archives</button>
                 <p id="error-message" class="error-message">Access Denied. Incorrect Codeword.</p>
@@ -204,8 +204,8 @@
                 
                 try {
                     const body = {
-                        agentId: agentIdInput.value.trim(),
-                        password: passwordInput.value
+                        teamId: agentIdInput.value.trim(),
+                        codeword: passwordInput.value
                     };
                     const res = await fetch('/login', {
                         method: 'POST',
@@ -214,8 +214,8 @@
                     });
                     const data = await res.json().catch(() => ({}));
                     if (res.ok && data && data.success) {
-                        // Save the agent ID to localStorage to be used by index.html
-                        localStorage.setItem('agentId', body.agentId);
+                        // Save the team ID to localStorage to be used by index.html
+                        localStorage.setItem('teamId', body.teamId);
                         // On success, fade out the form and redirect
                         loginFormContainer.style.opacity = '0';
                         loginFormContainer.style.transform = 'scale(0.9)';
