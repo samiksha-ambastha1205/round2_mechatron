@@ -13,7 +13,20 @@ app.use(cors());
 // To parse JSON request bodies
 app.use(express.json());
 // To serve static files like HTML, CSS, and client-side JS from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Disable default index.html at '/'; we'll control routes explicitly
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+// --- PAGE ROUTES ---
+
+// Root should show the login page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Explicit route for the main page after login
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // --- API ROUTES ---
 
@@ -50,9 +63,9 @@ app.post('/login', (req, res) => {
 
 // --- SERVE STATIC FILES ---
 
-// A catch-all route to serve the login.html page for any GET request that doesn't match a static file.
+// A catch-all route: redirect unknown paths to the login page
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    res.redirect('/');
 });
 
 // --- SERVER INITIALIZATION ---
