@@ -143,17 +143,6 @@
         .wax-seal-btn:hover { transform: scale(1.1); background: #a80303; }
         .wax-seal-btn .icon { filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5)); }
 
-        .admin-btn {
-            padding: 10px 20px; border-radius: 4px;
-            font-family: 'Playfair Display', serif; font-weight: bold;
-            cursor: pointer; transition: all 0.2s ease;
-            border: 2px solid #7c5c3c;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.2);
-        }
-        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); }
-        .admin-btn:active { transform: translateY(1px); }
-        .admin-btn.go { background: linear-gradient(145deg, #4a6b3b, #3a5c2b); color: var(--sepia-beige); border-color: #28441c; }
-
         /* --- Footer --- */
         .footer-strip {
             background-color: #2a2a2a; color: var(--sepia-beige);
@@ -188,15 +177,6 @@
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Start Session Overlay -->
-    <div id="start-session-overlay" class="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-charcoal-black/90 backdrop-blur-sm">
-        <div class="paper-card p-8 text-center max-w-lg">
-             <h2 class="text-3xl mb-4">Case File Access</h2>
-             <p class="text-lg mb-6 text-deep-brown">You are about to enter a secure archive. The session will be monitored under strict protocol. Confirm to proceed.</p>
-             <button id="start-session-btn" class="admin-btn go text-xl px-8 py-4">Begin Case Review</button>
-        </div>
-    </div>
-
     <!-- Security Overlays -->
     <div id="esc-warning-1" class="warning-overlay"><div class="entry-content"><h2>Security Warning 1 of 2</h2><p>Exiting fullscreen is a breach of protocol.</p><button class="resume-button">Resume Review</button></div></div>
     <div id="esc-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>A further breach will terminate the session and lock the archives.</p><button class="resume-button">Resume Review</button></div></div>
@@ -214,7 +194,7 @@
             <!-- Info Boxes -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="info-box">
-                    <h2 class="text-lg">Agent ID</h2>
+                    <h2 class="text-lg">Team ID</h2>
                     <span id="agent-id-display" class="text-2xl font-bold">Loading...</span>
                 </div>
                 <div class="info-box md:text-right">
@@ -301,8 +281,6 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const startSessionOverlay = document.getElementById('start-session-overlay');
-            const startSessionBtn = document.getElementById('start-session-btn');
             const caseWrapper = document.querySelector('.case-wrapper');
             const agentIdDisplay = document.getElementById('agent-id-display');
             const timerDisplay = document.getElementById('case-timer');
@@ -327,18 +305,15 @@
             let timeLeft = 900; // 15 minutes
             let initialWidth, initialHeight;
 
-            // Retrieve the agentId stored by login.html
-            agentId = localStorage.getItem('agentId');
+            // In a real scenario, login.html would save this. For now, we'll try to get it.
+            agentId = localStorage.getItem('teamId') || 'Unknown Team'; // Default for direct access
             if (!agentId) {
-                // If no agentId is found, redirect back to login.
                 window.location.href = 'login.html';
-                return; // Stop script execution
+                return;
             }
             agentIdDisplay.textContent = agentId;
 
-            startSessionBtn.addEventListener('click', () => {
-                startAndSecureSession();
-            });
+            startAndSecureSession();
 
             function startAndSecureSession() {
                 if (document.documentElement.requestFullscreen) {
@@ -346,14 +321,11 @@
                         console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
                     });
                 }
-                startSessionOverlay.style.display = 'none';
                 caseWrapper.style.display = 'block';
                 initialWidth = window.screen.width;
                 initialHeight = window.screen.height;
                 activateSecurityListeners();
                 startTimer();
-                // Clear the stored agentId now that the session has started securely
-                localStorage.removeItem('agentId');
             }
 
             function resumeFromWarning() {
@@ -399,8 +371,8 @@
                 document.addEventListener('visibilitychange', () => { if (document.hidden) handleTabSwitch(); });
                 window.addEventListener('blur', () => { if (isLinux) handleTabSwitch(); });
                 window.addEventListener('resize', () => {
-                    if (sessionHasEnded || !document.fullscreenElement) return;
-                     if (window.innerWidth < (initialWidth * 0.95) || window.innerHeight < (initialHeight * 0.95)) {
+                    if (sessionHasEnded || !initialWidth || !initialHeight) return;
+                    if (window.innerWidth < (initialWidth * 0.8) || window.innerHeight < (initialHeight * 0.8)) {
                         resizeWarningCount++;
                         pauseTimer();
                         if (resizeWarningCount === 1) { overlays.resize1.style.display = 'flex'; }
