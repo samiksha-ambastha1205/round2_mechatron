@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Baker Street Ledger | Admin Archives</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles for the Victorian Detective Theme */
+        :root {
+            --charcoal-black: #1a1a1a;
+            --deep-brown: #3d2c1d;
+            --brass-gold: #c89f68;
+            --sepia-beige: #f0e5d1;
+            --crimson-red: #8a0303;
+            --success-green: #2e4b3b;
+        }
+
+        body {
+            background-color: var(--charcoal-black);
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            font-family: 'Special Elite', monospace;
+            color: var(--sepia-beige);
+            overflow-x: auto;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        h1 { color: var(--sepia-beige); text-shadow: 2px 2px 2px #000; }
+        h2, h3 { color: var(--deep-brown); }
+
+        .header-plate {
+            background: linear-gradient(145deg, #a78051, #d3ad7c);
+            border: 2px solid #7c5c3c;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(255,255,255,0.2);
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+            color: var(--charcoal-black);
+        }
+
+        .paper-card {
+            background-color: var(--sepia-beige);
+            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.6), inset 0 0 40px rgba(0,0,0,0.2);
+            border: 1px solid #c3b5a0; border-radius: 3px;
+            position: relative; overflow: hidden;
+            color: var(--charcoal-black);
+        }
+        .paper-card::after {
+            content: ''; position: absolute; top: -10px; right: -10px; bottom: -10px; left: -10px;
+            background: transparent; box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            pointer-events: none; filter: blur(3px); border-radius: 5px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+            border: 1px solid var(--brass-gold); color: var(--sepia-beige);
+            padding: 1rem; border-radius: 4px; text-align: center;
+        }
+        .stat-number { font-size: 2.5rem; font-family: 'Playfair Display', serif; line-height: 1; }
+        .stat-label { opacity: 0.9; }
+
+        .admin-btn, select, input[type="text"], input[type="number"] {
+            padding: 10px 20px; border-radius: 4px;
+            font-family: 'Playfair Display', serif; font-weight: bold;
+            cursor: pointer; transition: all 0.2s ease;
+            border: 2px solid #7c5c3c;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); }
+        .admin-btn:active { transform: translateY(1px); }
+        .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        
+        .admin-btn { background: linear-gradient(145deg, #a78051, #d3ad7c); color: var(--charcoal-black); }
+        .admin-btn.danger { background: linear-gradient(145deg, #8a0303, #6b0202); color: var(--sepia-beige); border-color: #4d0101; }
+        .admin-btn.success { background: linear-gradient(145deg, #3a5c4a, #2e4b3b); color: var(--sepia-beige); border-color: #1f3528; }
+        .admin-btn.go { background: linear-gradient(145deg, #4a6b3b, #3a5c2b); color: var(--sepia-beige); border-color: #28441c; }
+        .admin-btn.warning { background: linear-gradient(145deg, #b56a16, #9e560d); color: var(--sepia-beige); border-color: #7a4106; }
+        .admin-btn.finalize { background: linear-gradient(145deg, #6c51a7, #533d82); color: var(--sepia-beige); border-color: #3b2a5d; }
+
+        select, input[type="text"], input[type="number"] {
+            background-color: var(--sepia-beige); color: var(--charcoal-black);
+            border: 1px solid var(--deep-brown); font-family: 'Special Elite', monospace;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--brass-gold); }
+        
+        .message {
+            padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; text-align: center;
+            font-family: 'Special Elite', monospace; border: 1px solid;
+        }
+        .message.success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+        .message.error { background-color: #f8d7da; color: #842029; border-color: #f5c2c7; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #c3b5a0; }
+        th {
+            background: rgba(61, 44, 29, 0.8); /* deep-brown with opacity */
+            color: var(--sepia-beige); font-family: 'Playfair Display', serif;
+        }
+        tbody tr:hover { background: rgba(200, 159, 104, 0.1); /* brass-gold with opacity */ }
+        .checkbox-cell, .rank-cell, .marks-cell { text-align: center; }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="container mx-auto">
+        <header class="header-plate p-4 my-6 rounded-lg text-center">
+            <h1 class="text-3xl md:text-4xl tracking-widest">ADMINISTRATIVE ARCHIVES</h1>
+        </header>
+
+        <div class="stats grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="stat-card"><div class="stat-number" id="total-teams">0</div><div class="stat-label">Logged In Agents</div></div>
+            <div class="stat-card"><div class="stat-number" id="selected-count">0</div><div class="stat-label">Selected for Debrief</div></div>
+            <div class="stat-card"><div class="stat-number text-2xl pt-2" id="active-round">-</div><div class="stat-label">Active Case Round</div></div>
+        </div>
+
+        <div class="paper-card p-6 md:p-8">
+            <h2 class="text-2xl pb-2 mb-4 border-b-2 border-double border-deep-brown">Field Operations Control</h2>
+            <div id="message"></div>
+            
+            <div class="space-y-4 mb-8">
+                <div class="flex flex-wrap gap-4">
+                    <button class="admin-btn success" onclick="refreshData()">🔄 Refresh Dossiers</button>
+                    <button class="admin-btn go" onclick="startQuizForAll()">▶️ Signal Start</button>
+                    <button class="admin-btn warning" id="publish-results-btn" onclick="publishResults()">🚀 Publish Findings</button>
+                    <button class="admin-btn danger" onclick="forceRedirect()">↩️ Force Return to Login</button>
+                    <button class="admin-btn danger" onclick="resetAllLogins()">🗑️ Reset Archives</button>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <button class="admin-btn success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected</button>
+                    <button class="admin-btn danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Remove Selected</button>
+                    <button class="admin-btn finalize" id="finalize-btn" onclick="finalizeSelections()" disabled>💾 Finalize Selections</button>
+                </div>
+            </div>
+
+            <div class="border-t border-dashed border-deep-brown/50 pt-6 mb-8">
+                 <h3 class="text-xl mb-4">Case Assignment</h3>
+                 <div class="flex flex-wrap items-center gap-4">
+                    <label for="round-select" class="font-bold">Active Case:</label>
+                    <select id="round-select">
+                        <option value="round1">Case File #1</option>
+                        <option value="round2">Case File #2</option>
+                        <option value="round3">Case File #3</option>
+                        <option value="round4">Case File #4</option>
+                        <option value="round5">Case File #5</option>
+                        <option value="round6">Case File #6</option>
+                    </select>
+                    <button class="admin-btn" onclick="setRound()">Set Active Case</button>
+                </div>
+            </div>
+
+            <div class="border-t border-dashed border-deep-brown/50 pt-6">
+                <h2 class="text-2xl pb-2 mb-4">Agent Roster & Selection</h2>
+                <div class="space-y-4 mb-6">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <input type="text" id="team-ids" placeholder="Agent IDs (e.g., S. Holmes, J. Watson)" class="flex-grow">
+                        <button class="admin-btn warning" onclick="selectSpecificTeams()">🎯 Select by ID</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <input type="number" id="top-n" placeholder="Top N Agents" min="1" class="w-48">
+                        <button class="admin-btn" onclick="selectTopN()">🏆 Select Top Performers</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-cell"><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                                <th class="rank-cell">Rank</th>
+                                <th>Agent ID</th>
+                                <th class="marks-cell">Merits</th>
+                                <th class="marks-cell">Time (s)</th>
+                                <th>Session Start</th>
+                                <th>Session End</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teams-tbody">
+                            <tr><td colspan="7" class="text-center p-8">Loading agent dossiers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTeams = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            loadServerStatus();
+        });
+
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => { messageDiv.innerHTML = ''; }, 4000);
+        }
+
+        function loadData() {
+            fetch('/api/logged-teams', { cache: 'no-store' })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    showMessage('Failed to load dossiers: ' + data.message, 'error');
+                    return;
+                }
+                allTeams = data.loggedInTeams || [];
+                // Sort by merits (marks), then by time taken
+                allTeams.sort((a, b) => {
+                    if (b.marks !== a.marks) return b.marks - a.marks;
+                    const aTime = a.timeTaken || Infinity;
+                    const bTime = b.timeTaken || Infinity;
+                    return aTime - bTime;
+                });
+                document.getElementById('total-teams').textContent = allTeams.length;
+                updateSelectedCount();
+                const tbody = document.getElementById('teams-tbody');
+                if (allTeams.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center p-8">No agents currently logged in.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = allTeams.map((team, index) => {
+                    const marks = team.marks !== undefined ? team.marks : 'N/A';
+                    const timeTaken = team.timeTaken ? (team.timeTaken / 1000).toFixed(2) : 'N/A';
+                    const startTime = new Date(team.loginTime).toLocaleString();
+                    const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : '---';
+                    return `
+                    <tr>
+                        <td class="checkbox-cell"><input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()"></td>
+                        <td class="rank-cell">#${index + 1}</td>
+                        <td>${team.teamId}</td>
+                        <td class="marks-cell">${marks}</td>
+                        <td class="marks-cell">${timeTaken}</td>
+                        <td>${startTime}</td>
+                        <td>${endTime}</td>
+                    </tr>`;
+                }).join('');
+            }).catch(err => showMessage('Error loading agent data.', 'error'));
+        }
+
+        function loadServerStatus() {
+            fetch('/api/status').then(res => res.json()).then(data => {
+                if (data.success) {
+                    const roundText = data.activeRound.replace('round', 'Case File #');
+                    document.getElementById('active-round').textContent = roundText;
+                    document.getElementById('round-select').value = data.activeRound;
+                }
+            }).catch(err => console.error('Error fetching server status:', err));
+        }
+        
+        function setRound() {
+            const selectedRound = document.getElementById('round-select').value;
+            if (!confirm(`Set active case to ${selectedRound.replace('round', 'File #')}?`)) return;
+            fetch('/admin/set-round', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ round: selectedRound })
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    showMessage(`Active case set to ${data.activeRound.replace('round', 'File #')}`, 'success');
+                    loadServerStatus();
+                } else {
+                    showMessage('Failed to set case: ' + data.message, 'error');
+                }
+            }).catch(err => showMessage('Error setting active case.', 'error'));
+        }
+
+        function startQuizForAll() {
+            if (!confirm('Signal all waiting agents to begin their assessment?')) return;
+            fetch('/admin/start-quiz', { method: 'POST' })
+            .then(res => res.json()).then(data => {
+                if(data.success) {
+                    showMessage('Start signal sent! Agents will be redirected for 8 seconds.', 'success');
+                } else {
+                    showMessage('Failed to send start signal.', 'error');
+                }
+            }).catch(err => showMessage('Error sending start signal.', 'error'));
+        }
+
+        function toggleSelectAll() {
+            document.querySelectorAll('.team-checkbox').forEach(cb => {
+                cb.checked = document.getElementById('select-all').checked;
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.team-checkbox:checked').length;
+            document.getElementById('selected-count').textContent = count;
+            document.getElementById('keep-selected-btn').disabled = count === 0;
+            document.getElementById('delete-selected-btn').disabled = count === 0;
+            document.getElementById('finalize-btn').disabled = count === 0;
+            const allCount = document.querySelectorAll('.team-checkbox').length;
+            if (allCount > 0) {
+                document.getElementById('select-all').checked = count === allCount;
+            }
+        }
+
+        function getSelectedTeamIds() {
+            return Array.from(document.querySelectorAll('.team-checkbox:checked')).map(cb => cb.value);
+        }
+
+        function keepSelectedTeams() {
+            const selectedIds = getSelectedTeamIds();
+            if (selectedIds.length === 0) return;
+            const allIds = Array.from(document.querySelectorAll('.team-checkbox')).map(cb => cb.value);
+            const idsToRemove = allIds.filter(id => !selectedIds.includes(id));
+            if (idsToRemove.length === 0) {
+                showMessage('All agents are selected. Nothing to remove.', 'error');
+                return;
+            }
+            if (!confirm(`Keep ${selectedIds.length} agent(s) and remove ${idsToRemove.length} others from the roster?`)) return;
+            fetch('/admin/remove-teams-batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teamIds: idsToRemove })
+            }).then(res => res.json()).then(data => {
+                if (data.success) showMessage('Successfully updated agent roster.', 'success');
+                else showMessage('Error: ' + data.message, 'error');
+                loadData();
+            }).catch(err => showMessage('Network error.', 'error'));
+        }
+
+        function refreshData() {
+            showMessage('Refreshing dossiers...');
+            loadData();
+            loadServerStatus();
+        }
+
+        function resetAllLogins() {
+            if (!confirm('Are you sure you want to reset ALL archives and selections? This action is irreversible.')) return;
+            fetch('/admin/reset-logins', { method: 'POST' }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    showMessage('All archives and selections have been reset.');
+                    loadData();
+                } else {
+                    showMessage('Failed to reset archives.', 'error');
+                }
+            }).catch(err => showMessage('Error resetting archives.', 'error'));
+        }
+
+        function deleteSelectedTeams() {
+            const selectedIds = getSelectedTeamIds();
+            if (selectedIds.length === 0) return;
+            if (!confirm(`Remove ${selectedIds.length} selected agent(s) from the roster?`)) return;
+            fetch('/admin/remove-teams-batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teamIds: selectedIds })
+            }).then(res => res.json()).then(data => {
+                if (data.success) showMessage(`Successfully removed ${data.removedCount} agent(s).`, 'success');
+                else showMessage('Error: ' + data.message, 'error');
+                loadData();
+            }).catch(err => showMessage('Network error.', 'error'));
+        }
+
+        function finalizeSelections() {
+            const selectedTeamIds = getSelectedTeamIds();
+            if (selectedTeamIds.length === 0) {
+                return showMessage('No agents selected to finalize.', 'error');
+            }
+            if (!confirm(`Finalize these ${selectedTeamIds.length} agents for the next round? This will overwrite previous selections.`)) {
+                return;
+            }
+            fetch('/admin/finalize-selections', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selectedTeams: selectedTeamIds })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`Successfully finalized ${selectedTeamIds.length} agents.`, 'success');
+                } else {
+                    showMessage('Failed to finalize selections: ' + data.message, 'error');
+                }
+            })
+            .catch(err => showMessage('Network error while finalizing selections.', 'error'));
+        }
+        
+        function publishResults() {
+             if (!confirm('Publish findings? This will alert agents on the results page for 8 seconds.')) return;
+            fetch('/admin/publish-results', { method: 'POST' }).then(res => res.json()).then(data => {
+                if(data.success) showMessage('Findings published! Signal is active for 8 seconds.', 'success');
+                else showMessage('Failed to publish findings.', 'error');
+            }).catch(err => showMessage('Error publishing findings.', 'error'));
+        }
+
+        function forceRedirect() {
+            if (!confirm('Force all agents on the selection page back to the login screen? (Signal active for 8 seconds)')) return;
+            fetch('/admin/force-redirect', { method: 'POST' }).then(res => res.json()).then(data => {
+                if(data.success) showMessage('Redirect command sent! Signal is active for 8 seconds.', 'success');
+                else showMessage('Failed to send redirect command.', 'error');
+            }).catch(err => showMessage('Error sending redirect command.', 'error'));
+        }
+
+        function selectSpecificTeams() {
+            const teamIdsInput = document.getElementById('team-ids');
+            const teamIdsStr = teamIdsInput.value.trim();
+            if (!teamIdsStr) {
+                return showMessage('Please provide agent IDs.', 'error');
+            }
+            
+            const teamIds = teamIdsStr.split(',').map(id => id.trim()).filter(Boolean);
+            if(teamIds.length === 0) {
+                return showMessage('Please provide valid agent IDs.', 'error');
+            }
+
+            document.querySelectorAll('.team-checkbox').forEach(cb => cb.checked = false);
+            let foundCount = 0;
+            let notFound = [];
+            
+            teamIds.forEach(id => {
+                const cb = document.querySelector(`.team-checkbox[value="${id}"]`);
+                if (cb) {
+                    cb.checked = true;
+                    foundCount++;
+                } else {
+                    notFound.push(id);
+                }
+            });
+            
+            updateSelectedCount();
+            
+            if (notFound.length > 0) {
+                showMessage(`Selected ${foundCount} of ${teamIds.length} agents. Not found: ${notFound.join(', ')}`, 'error');
+            } else {
+                showMessage(`Successfully selected ${foundCount} agent(s).`, 'success');
+            }
+            
+            teamIdsInput.value = '';
+        }
+
+        function selectTopN() {
+            const n = parseInt(document.getElementById('top-n').value);
+            if (!n || n < 1) return showMessage('Please enter a valid number.', 'error');
+            const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            if (n > allCheckboxes.length) showMessage(`Only ${allCheckboxes.length} agents available. Selecting all.`, 'error');
+            allCheckboxes.forEach((cb, index) => cb.checked = index < n);
+            updateSelectedCount();
+            showMessage(`Selected top ${Math.min(n, allCheckboxes.length)} agent(s).`, 'success');
+            document.getElementById('top-n').value = '';
+        }
+    </script>
+</body>
+</html>
